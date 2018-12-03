@@ -1,23 +1,15 @@
-/*!
- * chartjs-plugin-trendline.js
- * Version: 0.0.1
- *
- * Copyright 2017 Marcus Alsterfjord
- * Released under the MIT license
- * https://github.com/Makanz/chartjs-plugin-trendline/blob/master/README.md
- */
+
 var pluginTrendlineLinear = {
     beforeDraw: function (chartInstance) {
 
-        var yScale = chartInstance.scales["y-axis-0"],
-            canvas = chartInstance.chart,
-            ctx = canvas.ctx;        
+        var yScale = chartInstance.scales["y-axis-0"];
+        var canvas = chartInstance.chart;
+        var ctx = canvas.ctx;        
 
-        for (var i = 0; i < chartInstance.data.datasets.length; i++) {
-            
+        for(var i = 0; i < chartInstance.data.datasets.length; i++) {
             if (chartInstance.data.datasets[i].trendlineLinear) {                                               
-                var datasets = chartInstance.data.datasets[i],
-                    datasetMeta = chartInstance.getDatasetMeta(i);                                                     
+                var datasets = chartInstance.data.datasets[i];
+                var datasetMeta = chartInstance.getDatasetMeta(i);                                                     
 
                 addFitter(datasetMeta, ctx, datasets, yScale);
             }
@@ -28,16 +20,16 @@ var pluginTrendlineLinear = {
 function addFitter(datasetMeta, ctx, datasets, yScale) {
     
     var style = datasets.trendlineLinear.style;
-        style = (style !== undefined) ? style : "rgba(169,169,169, .6)";    
+    style = (style !== undefined) ? style : "rgba(169,169,169, .6)";    
     var lineWidth = datasets.trendlineLinear.width;
-        lineWidth = (lineWidth !== undefined) ? lineWidth : 3;
+    lineWidth = (lineWidth !== undefined) ? lineWidth : 3;
 
-    var lastIndex = datasets.data.length - 1,
-        startPos = datasetMeta.data[0]._model.x,
-        endPos = datasetMeta.data[lastIndex]._model.x,
-        fitter = new LineFitter();
+    var lastIndex = datasets.data.length - 1;
+    var startPos = datasetMeta.data[0]._model.x;
+    var endPos = datasetMeta.data[lastIndex]._model.x;
+    var fitter = new LineFitter();
 
-    for (var i = 0; i < datasets.data.length; i++) {
+    for(var i = 0; i < datasets.data.length; i++) {
         fitter.add(i, datasets.data[i]);
     }
 
@@ -62,10 +54,16 @@ function LineFitter() {
 LineFitter.prototype = {
     'add': function (x, y) {
         this.count++;
+
+        var yVal = y;
+        if(y.y) {
+            yVal = y.y
+        }
+        
         this.sumX += x;
         this.sumX2 += x * x;
-        this.sumXY += x * y;
-        this.sumY += y;
+        this.sumXY += x * yVal;
+        this.sumY += yVal;
     },
     'project': function (x) {
         var det = this.count * this.sumX2 - this.sumX * this.sumX;

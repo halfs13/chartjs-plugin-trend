@@ -1,19 +1,19 @@
 {
-  "name": "chartjs-plugin-trendline",
-  "version": "0.0.3",
-  "description": "Trendline for Chart.js",
-  "main": "chartjs-plugin-trendline.js",
+  "name": "chartjs-plugin-trend",
+  "version": "0.0.1",
+  "description": "Trend line for Chart.js",
+  "main": "chartjs-plugin-trend.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Makanz/chartjs-plugin-trendline.git"
+    "url": "git+https://github.com/halfs13/chartjs-plugin-trend.git"
   },
-  "author": "Marcus Alsterfjord",
+  "author": "halfs13",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Makanz/chartjs-plugin-trendline/issues"
+    "url": "https://github.com/halfs13/chartjs-plugin-trend/issues"
   },
-  "homepage": "https://github.com/Makanz/chartjs-plugin-trendline#readme"
+  "homepage": "https://github.com/halfs13/chartjs-plugin-trend#readme"
 }
