@@ -1,6 +1,6 @@
 {
   "name": "chartjs-plugin-trend",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Trend line for Chart.js",
   "main": "chartjs-plugin-trend.js",
   "scripts": {
