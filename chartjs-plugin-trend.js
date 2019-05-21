@@ -1,8 +1,8 @@
-
 var pluginTrendlineLinear = {
     beforeDraw: function (chartInstance) {
 
         var yScale = chartInstance.scales["y-axis-0"];
+        var xScale = chartInstance.scales['x-axis-0'];
         var canvas = chartInstance.chart;
         var ctx = canvas.ctx;        
 
@@ -11,13 +11,12 @@ var pluginTrendlineLinear = {
                 var datasets = chartInstance.data.datasets[i];
                 var datasetMeta = chartInstance.getDatasetMeta(i);                                                     
 
-                addFitter(datasetMeta, ctx, datasets, yScale);
+                addFitter(datasetMeta, ctx, datasets, yScale, xScale);
             }
         }
     }
 };
-
-function addFitter(datasetMeta, ctx, datasets, yScale) {
+function addFitter(datasetMeta, ctx, datasets, yScale, xScale) {
     
     var style = datasets.trendlineLinear.style;
     style = (style !== undefined) ? style : "rgba(169,169,169, .6)";    
@@ -25,18 +24,24 @@ function addFitter(datasetMeta, ctx, datasets, yScale) {
     lineWidth = (lineWidth !== undefined) ? lineWidth : 3;
 
     var lastIndex = datasets.data.length - 1;
-    var startPos = datasetMeta.data[0]._model.x;
-    var endPos = datasetMeta.data[lastIndex]._model.x;
+    var startPos = xScale.left;
+    var endPos = xScale.right;
     var fitter = new LineFitter();
 
     for(var i = 0; i < datasets.data.length; i++) {
-        fitter.add(i, datasets.data[i]);
+        fitter.add(datasetMeta.data[i]._model.x, datasetMeta.data[i]._model.y);
     }
 
     ctx.lineWidth = lineWidth;
     ctx.beginPath();
-    ctx.moveTo(startPos, yScale.getPixelForValue(fitter.project(0)));
-    ctx.lineTo(endPos, yScale.getPixelForValue(fitter.project(lastIndex)));
+    if(fitter.getXValFromPixel(yScale.top) > startPos) {
+    	startPos = fitter.getXValFromPixel(yScale.top);
+    }
+    ctx.moveTo(startPos, fitter.project(startPos));
+    if(fitter.getXValFromPixel(yScale.bottom) < endPos) {
+    	endPos = fitter.getXValFromPixel(yScale.bottom);
+    }
+    ctx.lineTo(endPos, fitter.project(endPos));
     ctx.strokeStyle = style;
     ctx.stroke();
 }
@@ -53,22 +58,42 @@ function LineFitter() {
 
 LineFitter.prototype = {
     'add': function (x, y) {
-        this.count++;
+    	if(y) {
+          this.count++;
 
-        var yVal = y;
-        if(y.y) {
-            yVal = y.y
-        }
-        
-        this.sumX += x;
-        this.sumX2 += x * x;
-        this.sumXY += x * yVal;
-        this.sumY += yVal;
+          var yVal = y;
+          if(y.y) {
+              yVal = y.y
+          }
+
+          this.sumXY += x * yVal;
+          this.sumX += x;
+          this.sumY += yVal;
+          this.sumX2 += x * x;
+    	}
     },
     'project': function (x) {
-        var det = this.count * this.sumX2 - this.sumX * this.sumX;
-        var offset = (this.sumX2 * this.sumY - this.sumX * this.sumXY) / det;
-        var scale = (this.count * this.sumXY - this.sumX * this.sumY) / det;
-        return offset + x * scale;
-    }
+        var a = this.count * this.sumXY;
+        var b = this.sumX * this.sumY;
+        var c = this.count * this.sumX2;
+        var d = this.sumX * this.sumX;
+        
+        var slope = (a - b) / (c - d);
+        var f = slope * this.sumX;
+        var yInt = (this.sumY - f) / this.count;
+        var value = (slope * x) + yInt;
+        return value;
+    },
+    getXValFromPixel: function(yMinPixel) {
+    	var a = this.count * this.sumXY;
+        var b = this.sumX * this.sumY;
+        var c = this.count * this.sumX2;
+        var d = this.sumX * this.sumX;
+        
+        var slope = (a - b) / (c - d);
+        var f = slope * this.sumX;
+        var yInt = (this.sumY - f) / this.count;
+        var x = (yMinPixel - yInt) / slope;
+        return x;
+    }  
 };
